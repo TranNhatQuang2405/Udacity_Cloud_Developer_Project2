@@ -1,6 +1,7 @@
 import fs from "fs";
 import Jimp from "jimp";
 import axios from "axios";
+import { log } from "console";
 
 // filterImageFromURL
 // helper function to download, filter, and save the filtered image locally
@@ -20,7 +21,7 @@ export async function filterImageFromURL(inputURL) {
 
     const photo = await Jimp.read(imageBuffer);
     const outpath = `/tmp/filtered.${Math.floor(Math.random() * 2000)}.jpg`;
-    const path = __dirname + outpath;
+    const path = "/tmp/filtered." + outpath;
     const photoResult = await photo
       .resize(256, 256) // resize
       .quality(60) // set JPEG quality
@@ -28,6 +29,7 @@ export async function filterImageFromURL(inputURL) {
       .writeAsync(path);
     return path;
   } catch (error) {
+    console.log(error)
     throw new Error("Filter Image Error!");
   }
 }
