@@ -49,4 +49,4 @@ Add your own domain name and have it point to the running services (try adding a
 
 
 ## Result:
-My Elastic Endpoint Url: 
+My Elastic Endpoint Url: http://cd12099-full-stack-apps-aws-dev.us-east-1.elasticbeanstalk.com/
