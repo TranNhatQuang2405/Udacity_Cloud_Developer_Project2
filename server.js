@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { filterImageFromURL, deleteLocalFiles } from './util/util.js';
-import isUri from "valid_url"
 
 
 // Init the Express application
@@ -13,20 +12,28 @@ const port = process.env.PORT || 8082;
 // Use the body parser middleware for post requests
 app.use(bodyParser.json());
 
-app.get("/filteredimage", async (req, res) => {
-  const { image_url: imageUrl } = req.query;
-  if (!imageUrl || !isUri(imageUrl)) {
-    return res.status(400).send({ code: "400", message: 'Image url is missing or malformed' });
-  }
+app.get("/filteredimage", async (req, res, next) => {
+  let imageUrl = req.query.image_url
 
   try {
-    const filteredPath = await filterImageFromURL(imageUrl);
-    res.sendFile(filteredPath, {}, () => deleteLocalFiles([filteredPath]));
-  }
-  catch (e) {
-    res.status(500).send({ code: "500", message: 'Internal Server Error' });
+    let url = await filterImageFromURL(imageUrl)
+    res.sendFile(url, (e) => {
+      deleteLocalFiles(Array.of(url))
+    })
+  } catch (error) {
+    next(error)
   }
 });
+
+app.get("/", async (req, res) => {
+  res.send("GET")
+});
+
+const errorHandler = (error, request, response, next) => {
+  const status = error.status || 422
+  response.status(status).send(error.message)
+}
+app.use(errorHandler)
 
 // Root Endpoint
 // Displays a simple message to the user
