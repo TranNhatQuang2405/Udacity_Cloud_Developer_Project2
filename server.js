@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { filterImageFromURL, deleteLocalFiles } from './util/util.js';
-
+import isUri from "valid_url"
 
 
 // Init the Express application
@@ -16,12 +16,16 @@ app.use(bodyParser.json());
 app.get("/filteredimage", async (req, res) => {
   const { image_url: imageUrl } = req.query;
   if (!imageUrl || !isUri(imageUrl)) {
-    return res.status(400).send({ auth: false, message: 'Image url is missing or malformed' });
+    return res.status(400).send({ code: "400", message: 'Image url is missing or malformed' });
   }
 
-  const filteredPath = await filterImageFromURL(imageUrl);
-
-  res.sendFile(filteredPath, {}, () => deleteLocalFiles([filteredPath]));
+  try {
+    const filteredPath = await filterImageFromURL(imageUrl);
+    res.sendFile(filteredPath, {}, () => deleteLocalFiles([filteredPath]));
+  }
+  catch (e) {
+    res.status(500).send({ code: "500", message: 'Internal Server Error' });
+  }
 });
 
 // Root Endpoint
